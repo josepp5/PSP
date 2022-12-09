@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.RadioMenuItem?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.currencyconverter.HelloController">
+   <children>
+      <AnchorPane layoutX="7.0" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <TextField fx:id="textCurrency" layoutX="79.0" layoutY="81.0" onKeyTyped="#textChanged" />
+            <Label fx:id="lblResult" layoutX="79.0" layoutY="123.0" prefHeight="18.0" prefWidth="150.0" text="Result" />
+            <MenuBar fx:id="menuCurrency" layoutX="79.0" layoutY="39.0">
+              <menus>
+                <Menu mnemonicParsing="false" text="Options">
+                  <items>
+                        <RadioMenuItem fx:id="mi1" mnemonicParsing="false" onAction="#reset" selected="true" text="EUR&gt;USD">
+                           <toggleGroup>
+                              <ToggleGroup fx:id="currencyGroup" />
+                           </toggleGroup>
+                        </RadioMenuItem>
+                        <RadioMenuItem fx:id="mi2" mnemonicParsing="false" onAction="#reset" text="EUR&gt;GBP" toggleGroup="$currencyGroup" />
+                        <RadioMenuItem fx:id="mi3" mnemonicParsing="false" onAction="#reset" text="USD&gt;EUR" toggleGroup="$currencyGroup" />
+                        <RadioMenuItem fx:id="mi4" mnemonicParsing="false" onAction="#reset" text="USD&gt;GBP" toggleGroup="$currencyGroup" />
+                        <RadioMenuItem fx:id="mi5" mnemonicParsing="false" onAction="#reset" text="GBP&gt;EUR" toggleGroup="$currencyGroup" />
+                        <RadioMenuItem fx:id="mi6" mnemonicParsing="false" onAction="#reset" text="GBP&gt;USD" toggleGroup="$currencyGroup" />
+                  </items>
+                </Menu>
+              </menus>
+            </MenuBar>
+            <Label fx:id="lblSymbol" layoutX="240.0" layoutY="81.0" text="€">
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Label>
+         </children>
+      </AnchorPane>
+   </children>
+</AnchorPane>
