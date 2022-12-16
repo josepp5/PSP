@@ -1,15 +1,22 @@
 package com.jpoveda.flightsfx;
 
 import com.jpoveda.flightsfx.model.Flight.Flight;
+import com.jpoveda.flightsfx.utils.FileUtils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.stage.Stage;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -29,6 +36,8 @@ public class HelloController {
     private Button btnDelete;
     @FXML
     private Button btnFilter;
+    @FXML
+    private Button btnChart;
     @FXML
     private ChoiceBox<String> choiceFilter;
     @FXML
@@ -55,8 +64,8 @@ public class HelloController {
         return flight;
     }
 
-    static DateTimeFormatter formatterDeparture = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-    static DateTimeFormatter formatterDuration = DateTimeFormatter.ofPattern("HH:mm");
+    public static DateTimeFormatter formatterDeparture = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    public static DateTimeFormatter formatterDuration = DateTimeFormatter.ofPattern("HH:mm");
 
     @FXML
     public void initialize() {
@@ -71,23 +80,36 @@ public class HelloController {
         );
         // Se carga la lista con los elementos del .txt
         flight = FXCollections.observableArrayList(
-                getList()
+                FileUtils.loadFlights()
         );
         colFlightNumber.setCellValueFactory(new PropertyValueFactory("flightNum"));
         colDestination.setCellValueFactory(new PropertyValueFactory("destination"));
-        colDeparture.setCellValueFactory(new PropertyValueFactory("departure"));
+        colDeparture.setCellValueFactory(new PropertyValueFactory("formattedDeparture"));
         colDuration.setCellValueFactory(new PropertyValueFactory("duration"));
         tableFlight.setItems(flight);
+        
+        btnDelete.setDisable(false);
+        if (tableFlight.getSelectionModel() == null){
+            btnDelete.setDisable(true);
+        }
+    }
 
-
-        //if (tableFlight.getSelectionModel() != null) btnDelete.isVisible(); else btnDelete.isDisable();
+    @FXML
+    void goToChartView(ActionEvent event) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("ChartView.fxml"));
+        Parent view1 = loader.load();
+        Scene view1Scene = new Scene(view1);
+        Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+        stage.hide();
+        stage.setScene(view1Scene);
+        stage.show();
     }
 
     @FXML
     void onFilter(ActionEvent event) {
         var choiceItem = choiceFilter.getValue();
         List<Flight> filterFlightList = null;
-        flightFilter = FXCollections.observableArrayList(getList());
+        flightFilter = FXCollections.observableArrayList(FileUtils.loadFlights());
         flightFilter.clear();
 
         switch (choiceItem) {
@@ -139,16 +161,15 @@ public class HelloController {
     @FXML
     void onDelete(ActionEvent event) {
         int position = tableFlight.getSelectionModel().getSelectedIndex();
-        flight.remove(position);
-        saveFile(flight);
-    }
-
-    @FXML
-    private static void saveFile(List<Flight> flight) {
-        try (PrintWriter pw = new PrintWriter("flights.txt")) {
-            flight.stream().forEach(f -> pw.println(f.toString()));
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (position != -1){
+            flight.remove(position);
+            FileUtils.saveFlights(flight);
+        } else {
+            Alert dialog = new Alert(Alert.AlertType.ERROR);
+            dialog.setTitle("Error");
+            dialog.setHeaderText("Error deleting data");
+            dialog.setContentText("There is not item selected");
+            dialog.showAndWait();
         }
     }
 
@@ -172,23 +193,7 @@ public class HelloController {
                             LocalTime.parse(textFDuration.getText(), formatterDuration)
                     )
             );
-            saveFile(flight);
+            FileUtils.saveFlights(flight);
         }
     }
-
-    private static List<Flight> getList() {
-        try {
-            return Files.lines(Paths.get("flights.txt"))
-                    .map(line -> new Flight(line.split(";")[0],
-                            line.split(";")[1],
-                            LocalDateTime.parse(line.split(";")[2], formatterDeparture),
-                            LocalTime.parse(line.split(";")[3], formatterDuration)))
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-
 }
